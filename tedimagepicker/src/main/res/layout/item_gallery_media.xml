@@ -29,6 +29,10 @@
             type="boolean" />
 
         <variable
+            name="showDuration"
+            type="boolean" />
+
+        <variable
             name="duration"
             type="String" />
 
@@ -58,6 +62,39 @@
                 bind:imageUri="@{media.uri}" />
 
             <FrameLayout
+                android:id="@+id/view_zoom_out"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_padding_xsmall"
+                android:padding="@dimen/default_padding_xsmall"
+                android:clickable="@{!isSelected}"
+                android:visibility="@{showZoom}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <ImageView
+                    android:layout_width="@dimen/ted_image_picker_zoom_size"
+                    android:layout_height="@dimen/ted_image_picker_zoom_size"
+                    android:adjustViewBounds="true"
+                    android:background="@color/ted_image_picker_zoom_background"
+                    android:src="@drawable/ic_zoom_out_24dp" />
+            </FrameLayout>
+
+            <TextView
+                style="@style/TextAppearance.TedImagePicker.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_padding_small"
+                android:background="@color/black_54"
+                android:padding="@dimen/default_padding_xsmall"
+                android:text="@{duration}"
+                android:textColor="@color/white"
+                android:visibility="@{showDuration}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:text="00:11" />
+
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:visibility="@{selectType == SelectType.MULTI}"
@@ -73,7 +110,7 @@
                     android:visibility="@{isSelected}" />
 
                 <TextView
-                    style="@style/TextAppearance.AppCompat.Body1"
+                    style="@style/TextAppearance.TedImagePicker.Body1"
                     android:layout_width="@dimen/list_item_avatar_size_small"
                     android:layout_height="@dimen/list_item_avatar_size_small"
                     android:layout_gravity="end"
@@ -85,39 +122,6 @@
                     tools:background="@drawable/bg_multi_image_selected"
                     tools:text="5" />
             </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/view_zoom_out"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding_xsmall"
-                android:padding="@dimen/default_padding_xsmall"
-                android:visibility="@{showZoom}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <ImageView
-                    android:layout_width="@dimen/ted_image_picker_zoom_size"
-                    android:layout_height="@dimen/ted_image_picker_zoom_size"
-                    android:adjustViewBounds="true"
-                    android:background="@color/ted_image_picker_zoom_background"
-                    android:src="@drawable/ic_zoom_out_24dp" />
-            </FrameLayout>
-
-            <TextView
-                style="@style/TextAppearance.AppCompat.Caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding_small"
-                android:background="@color/black_54"
-                android:padding="@dimen/default_padding_xsmall"
-                android:text="@{duration}"
-                android:textColor="@color/white"
-                android:visibility="@{duration != null}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:text="00:11" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
 </layout>

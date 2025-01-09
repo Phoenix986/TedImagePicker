@@ -1,29 +1,33 @@
 package gun0912.tedimagepicker.builder.type
 
-import android.net.Uri
-import android.os.Environment
+import android.Manifest
+import android.os.Build
 import android.os.Parcelable
-import android.provider.MediaStore
-import kotlinx.android.parcel.Parcelize
+import androidx.annotation.StringRes
+import gun0912.tedimagepicker.R
+import kotlinx.parcelize.Parcelize
+
 
 @Parcelize
-enum class MediaType(
-    val savedDirectoryName: String,
-    val fileSuffix: String,
-    val mimeType: String,
-    val externalContentUri: Uri
-) :
-    Parcelable {
-    IMAGE(
-        Environment.DIRECTORY_PICTURES,
-        ".jpg",
-        "image/*",
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-    ),
-    VIDEO(
-        Environment.DIRECTORY_MOVIES,
-        ".mp4",
-        "video/*",
-        MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-    );
+enum class MediaType(@StringRes val nameResId: Int) : Parcelable {
+    IMAGE(R.string.ted_image_picker_image),
+    VIDEO(R.string.ted_image_picker_video),
+    IMAGE_AND_VIDEO(R.string.ted_image_picker_image_video),
+    ;
+
+    val permissions: Array<String>
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when (this) {
+                IMAGE -> arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+                VIDEO -> arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
+                IMAGE_AND_VIDEO -> arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO
+                )
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        } else {
+            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
 }

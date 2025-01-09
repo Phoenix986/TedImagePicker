@@ -2,7 +2,7 @@
 
 TedImagePicker is **simple/beautiful/smart** image picker
 
-- Support Image/Video
+- Support Image/Video/Image&Video
 - Support Single/Multi select
 - Support more configuration option
 
@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     implementation 'io.github.ParkSangGwon:tedimagepicker:x.y.z'
-    //implementation 'io.github.ParkSangGwon:tedimagepicker:1.1.10'
+    //implementation 'io.github.ParkSangGwon:tedimagepicker:1.6.1'
 }
 
 ```
@@ -56,6 +56,12 @@ If you think this library is useful, please press star button at upside. </br>
 ```
 dataBinding {
     enabled = true
+}
+
+or
+
+buildFeatures {
+    dataBinding = true
 }
 ```
 
@@ -147,55 +153,71 @@ TedRxImagePicker.with(this)
 
 #### Common
 
-* `mediaType(MediaType)` : MediaType.IMAGE / MediaType.VIDEO
-* `cameraTileBackground(R.color.xxx)`
-* `cameraTileImage(R.drawable.xxx)`
-* `showCameraTile(Boolean) (default: true)`
-* `scrollIndicatorDateFormat(String)(default: YYYY.MM)`
-* `showTitle(Boolean)(default: true)`
-* `title(String or R.string.xxx) (default: 'Select Image','사진 선택')`
-* `backButton(R.drawable.xxx)`
-* `zoomIndicator(Boolean) (default: true)`
-* `image()`
-* `video()`
+|      Function        |    Description    | 
+| ----------------------- | ---------------- |
+| `mediaType(MediaType)` | MediaType.IMAGE / MediaType.VIDEO / MediaType.IMAGE_AND_VIDEO |
+| `cameraTileBackground(R.color.xxx)`| camera Tile Background Color |
+| `cameraTileImage(R.drawable.xxx)` | camera tile image |
+| `showCameraTile(Boolean)` default `true` | show camera tile |
+| `scrollIndicatorDateFormat(String) (default: YYYY.MM)` | Format of date on scroll indicator |
+| `showTitle(Boolean)(default: true)` | Show title |
+| `title(String or R.string.xxx) (default: 'Select Image','사진 선택')` | title |
+| `backButton(R.drawable.xxx)` | back button |
+| `zoomIndicator(Boolean) (default: true)`| zoom indicator |
+| `image()` | image |
+| `video()` | video |
+| `imageAndVideo()` | image and video |
+| `imageCountTextFormat(String) (default: %s)`: `%s장`,  `Count: %s`| image count text format |
+| `savedDirectoryName(String)` | saved directory name from take picture using camera |
+| `startAnimation(Int, Int)` | start animation |
+| `finishAnimation(Int, Int)` | finish animation |
+| `errorListener()` | error listener for error |
+| `cancelListener()` | cancel listener |
 
-- `mediaType(MediaType)` : MediaType.IMAGE / MediaType.VIDEO
-- `cameraTileBackground(R.color.xxx)`
-- `cameraTileImage(R.drawable.xxx)`
-- `showCameraTile(Boolean) (default: true)`
-- `scrollIndicatorDateFormat(String)(default: YYYY.MM)`
-- `title(String or R.string.xxx) (default: 'Select Image','사진 선택')`
-- `backButton(R.drawable.xxx)`
-- `zoomIndicator(Boolean) (default: true)`
-- `imageCountTextFormat(String) (default: %s)`: `%s장`,  `Count: %s`
-- `savedDirectoryName(String): saved directory name from take picture using camera`
-- `startAnimation(Int, Int)`
-- `finishAnimation(Int, Int)`
-- `errorListener()`
-- `cancelListener()`
 
-- Change picker primary color
-: override color name in your colors.xml
-```xml
-    <color name="ted_image_picker_primary">#your_color_code</color>
-    <color name="ted_image_picker_primary_pressed">#your_color_code</color>
-```
+
 
 #### Multi Select
 
-- `selectedUri(List<Uri>)`
-- `buttonGravity(ButtonGravity)`: You can change `done` button location top or bottom
-- `buttonText(String or R.string.xxx) (default: 'Done','완료')`
-- `buttonBackground(R.drawable.xxx) (default: Blue Background)`
-- `buttonTextColor(R.color.xxx) (default: white)`
-- `buttonDrawableOnly(R.drawable.xxx) (default: false)`: If you want show drawable button without text, use this method
-- `max(Int, String or R.string.xxx)`
-- `min(Int, String or R.string.xxx)`
-- `drawerAlbum() / dropDownAlbum() (default: Drawer)`: You can choice Drawer or DropDown album style
+|      Method        |    Description    | 
+| ----------------------- | ---------------- |
+| `selectedUri(List<Uri>)` | selected uri |
+| `buttonGravity(ButtonGravity)` | You can change `done` button location top or bottom |
+| `buttonText(String or R.string.xxx) (default: 'Done','완료')` | you can change `done` button text |
+| `buttonBackground(R.drawable.xxx) (default: Blue Background)` | you can change `done` button background color |
+| `buttonTextColor(R.color.xxx) (default: white)` | `done` button text color |
+| `buttonDrawableOnly(R.drawable.xxx) (default: false)` | If you want show drawable button without text, use this method |
+| `max(Int, String or R.string.xxx)` | **max content** should picked from user device |
+| `min(Int, String or R.string.xxx)` | **min content** should picked from user device |
+| `drawerAlbum() / dropDownAlbum() (default: Drawer)`| You can choice Drawer or DropDown album style |
+
   </br></br>
 
-## FAQ
+#### UI
+- Change picker primary color
+: override color name in your colors.xml
+```xml
+<color name="ted_image_picker_primary">#your_color_code</color>
+<color name="ted_image_picker_primary_pressed">#your_color_code</color>
+```
 
+- Change textAppearance style
+: override text style in your styles.xml
+
+style list
+- TextAppearance.TedImagePicker.Subhead
+- TextAppearance.TedImagePicker.Body1
+- TextAppearance.TedImagePicker.Caption
+
+```xml
+<style name="TextAppearance.MyApp.Body1" parent="@style/TextAppearance.AppCompat.Body1">
+    <item name="android:textSize">...</item>
+    <item name="android:fontFamily">...</item>
+</style>
+<style name="TextAppearance.TedImagePicker.Body1" parent="@style/TextAppearance.MyApp.Body1" />
+```
+
+## FAQ
 ### - Do not need to check permissions?
 
 - Yes, `TedImagePicker` automatically check permission.
@@ -206,6 +228,25 @@ TedRxImagePicker.with(this)
 
 - You have to enable databinding
 - Read [this](https://github.com/ParkSangGwon/TedImagePicker/blob/master/README.md#1enable-databinding)
+
+#### - `Duplicate class android.support.v4.xxx`: Execution failed for task ':app:checkDebugDuplicateClasses'
+- Add `android.enableJetifier=true` in your gradle.properties file
+
+### - I'm using targetSdkVersion less than 33 and it doesn't work
+- You have to use `targetSdkVersion 33`
+- If you use targetSdkVersion 32, you can not support SDK 33(Android OS 13) device.
+- these day, there are so many android os 13 device.
+- So you have to use targetSdkVersion 33
+
+### - I'm using targetSdkVersion less than 34 and it doesn't work
+- Starting with targetSdkVersion 34, you need to control the permission READ_MEDIA_VISUAL_USER_SELECTED.
+: [Grant partial access to photos and videos](https://developer.android.com/about/versions/14/changes/partial-photo-video-access)
+- If you still keep targetSdkVersion set to 33 to not control the READ_MEDIA_VISUAL_USER_SELECTED permission, you need to add the code below to your Manifest file.
+```xml
+<uses-permission
+    android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+    tools:node="remove" />
+```
 
 </br></br>
 

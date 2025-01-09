@@ -13,7 +13,7 @@ import androidx.annotation.AnimRes
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.gun0912.tedpermission.TedPermissionResult
+import com.gun0912.tedpermission.TedPermissionUtil
 import com.gun0912.tedpermission.rx2.TedPermission
 import com.tedpark.tedonactivityresult.rx2.TedRxOnActivityResult
 import gun0912.tedimagepicker.R
@@ -27,7 +27,7 @@ import gun0912.tedimagepicker.builder.type.ButtonGravity
 import gun0912.tedimagepicker.builder.type.MediaType
 import gun0912.tedimagepicker.builder.type.SelectType
 import gun0912.tedimagepicker.util.ToastUtil
-import io.reactivex.Single
+import gun0912.tedimagepicker.util.isPartialAccessGranted
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -97,26 +97,27 @@ open class TedImagePickerBaseBuilder<out B : TedImagePickerBaseBuilder<B>>(
 
     @SuppressLint("CheckResult")
     protected fun startInternal(context: Context) {
-        checkPermission(context)
-            .subscribe({ permissionResult ->
-                if (permissionResult.isGranted) {
-                    startActivity(context)
-                }
-            }, { throwable -> onErrorListener?.onError(throwable) })
+        val requestPermissions = getRequestPermissions()
+        if (TedPermissionUtil.isGranted(*requestPermissions) || mediaType.isPartialAccessGranted) {
+            startActivity(context)
+        } else {
+            TedPermission.create()
+                .setPermissions(*requestPermissions)
+                .request()
+                .subscribe({ permissionResult ->
+                    if (permissionResult.isGranted || mediaType.isPartialAccessGranted) {
+                        startActivity(context)
+                    }
+                }, { throwable -> onErrorListener?.onError(throwable) })
+        }
     }
 
-    private fun checkPermission(context: Context): Single<TedPermissionResult> {
-        val permissions = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            )
-        } else {
-            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    private fun getRequestPermissions(): Array<String> {
+        val permissions = mediaType.permissions.toMutableList()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            permissions.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
         }
-        return TedPermission.create()
-            .setPermissions(*permissions)
-            .request()
+        return permissions.toTypedArray()
     }
 
     private fun startActivity(context: Context) {
@@ -154,6 +155,8 @@ open class TedImagePickerBaseBuilder<out B : TedImagePickerBaseBuilder<B>>(
     fun image(): B = mediaType(MediaType.IMAGE)
 
     fun video(): B = mediaType(MediaType.VIDEO)
+
+    fun imageAndVideo(): B = mediaType(MediaType.IMAGE_AND_VIDEO)
 
     fun cameraTileBackground(@ColorRes cameraTileBackgroundResId: Int): B {
         this.cameraTileBackgroundResId = cameraTileBackgroundResId

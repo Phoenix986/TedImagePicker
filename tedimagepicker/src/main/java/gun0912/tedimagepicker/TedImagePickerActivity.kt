@@ -9,12 +9,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,6 +30,8 @@ import gun0912.tedimagepicker.adapter.SelectedMediaAdapter
 import gun0912.tedimagepicker.base.BaseRecyclerViewAdapter
 import gun0912.tedimagepicker.builder.TedImagePickerBaseBuilder
 import gun0912.tedimagepicker.builder.type.AlbumType
+import gun0912.tedimagepicker.builder.type.CameraMedia
+import gun0912.tedimagepicker.builder.type.MediaType
 import gun0912.tedimagepicker.builder.type.SelectType
 import gun0912.tedimagepicker.databinding.ActivityTedImagePickerBinding
 import gun0912.tedimagepicker.extenstion.close
@@ -36,19 +40,23 @@ import gun0912.tedimagepicker.extenstion.setLock
 import gun0912.tedimagepicker.extenstion.toggle
 import gun0912.tedimagepicker.model.Album
 import gun0912.tedimagepicker.model.Media
+import gun0912.tedimagepicker.partialaccess.PartialAccessManageBottomSheet
 import gun0912.tedimagepicker.util.GalleryUtil
 import gun0912.tedimagepicker.util.MediaUtil
 import gun0912.tedimagepicker.util.ToastUtil
+import gun0912.tedimagepicker.util.isPartialAccessGranted
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 
-internal class TedImagePickerActivity : AppCompatActivity() {
+internal class TedImagePickerActivity
+    : AppCompatActivity(),
+    PartialAccessManageBottomSheet.Listener {
 
     private lateinit var binding: ActivityTedImagePickerBinding
     private val albumAdapter by lazy { AlbumAdapter(builder) }
@@ -77,6 +85,7 @@ internal class TedImagePickerActivity : AppCompatActivity() {
         setupSelectedMediaView()
         setupButton()
         setupAlbumType()
+        setupPartialAccessView()
         loadMedia()
 
     }
@@ -105,6 +114,7 @@ internal class TedImagePickerActivity : AppCompatActivity() {
                 finish()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -269,9 +279,14 @@ internal class TedImagePickerActivity : AppCompatActivity() {
 
     @SuppressLint("CheckResult")
     private fun onCameraTileClick() {
+        val cameraMedia = when (builder.mediaType) {
+            MediaType.IMAGE -> CameraMedia.IMAGE
+            MediaType.VIDEO -> CameraMedia.VIDEO
+            MediaType.IMAGE_AND_VIDEO -> CameraMedia.IMAGE
+        }
         val (cameraIntent, uri) = MediaUtil.getMediaIntentUri(
             this@TedImagePickerActivity,
-            builder.mediaType,
+            cameraMedia,
             builder.savedDirectoryName
         )
         TedRxOnActivityResult.with(this@TedImagePickerActivity)
@@ -427,6 +442,28 @@ internal class TedImagePickerActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupPartialAccessView() =
+        with(binding.layoutContent.layoutTedImagePickerPartialAccessManage) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                root.isGone = true
+                return@with
+            }
+            root.isVisible = builder.mediaType.isPartialAccessGranted
+            tvPartialAccessManage.setOnClickListener { showPartialAccessManageDialog() }
+            val mediaTypeText = getString(builder.mediaType.nameResId)
+            tvPartialAccessNotice.text =
+                getString(R.string.ted_image_picker_partial_access_notice_fmt, mediaTypeText)
+        }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun showPartialAccessManageDialog() {
+        PartialAccessManageBottomSheet.show(this, builder.mediaType)
+    }
+
+    override fun onRefreshMedia() {
+        loadMedia(true)
+        setupPartialAccessView()
+    }
 
     override fun onBackPressed() {
         if (isAlbumOpened()) {
